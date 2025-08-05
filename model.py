@@ -61,17 +61,14 @@ class AudioCNN(nn.Module):
     def forward(self, x, return_feature_maps=False):
         if not return_feature_maps:
             x = self.conv1(x)
-            for i, block in enumerate(self.layer1):
-                x = block(x, feature_maps, prefix=f'layer1.block{i}')
-                
-            for i, block in enumerate(self.layer2):
-                x = block(x, feature_maps, prefix=f'layer2.block{i}')
-                
-            for i, block in enumerate(self.layer3):
-                x = block(x, feature_maps, prefix=f'layer3.block{i}')
-                
-            for i, block in enumerate(self.layer4):
-                x = block(x, feature_maps, prefix=f'layer4.block{i}')
+            for block in self.layer1:
+                x = block(x)
+            for block in self.layer2:
+                x = block(x)
+            for block in self.layer3:
+                x = block(x)
+            for block in self.layer4:
+                x = block(x)
                 
             x = self.avgpool(x)
             x = x.view(x.size(0), -1)
@@ -85,20 +82,20 @@ class AudioCNN(nn.Module):
             x = self.conv1(x)
             feature_maps["conv1"] = x
             
-            for block in self.layer1:
-                x = block(x)
+            for i, block in enumerate(self.layer1):
+                x = block(x, feature_maps, prefix=f'layer1.block{i}')
             feature_maps["layer1"] = x
                 
-            for block in self.layer2:
-                x = block(x)
+            for i, block in enumerate(self.layer2):
+                x = block(x, feature_maps, prefix=f'layer2.block{i}')
             feature_maps["layer2"] = x
                 
-            for block in self.layer3:
-                x = block(x)
+            for i, block in enumerate(self.layer3):
+                x = block(x, feature_maps, prefix=f'layer3.block{i}')
             feature_maps["layer3"] = x
                 
-            for block in self.layer4:
-                x = block(x)
+            for i, block in enumerate(self.layer4):
+                x = block(x, feature_maps, prefix=f'layer4.block{i}')
             feature_maps["layer4"] = x
                 
             x = self.avgpool(x)

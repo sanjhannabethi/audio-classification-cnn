@@ -26,7 +26,7 @@ class AudioProcessor:
     def __init__(self):
         self.transform = nn.Sequential(
             T.MelSpectrogram(
-                sample_rate=44100,
+                sample_rate=22050,
                 n_fft=1024,
                 hop_length=512,
                 n_mels=128,
@@ -44,8 +44,10 @@ class AudioProcessor:
         spectrogram = self.transform(waveform)
         return spectrogram.unsqueeze(0)
 
+
 class InferenceRequest(BaseModel):
     audio_data: str
+
 
 @app.cls(image=image, gpu="A10G", volumes={"/models": model_volume}, scaledown_window=15)
 class AudioClassifier:
