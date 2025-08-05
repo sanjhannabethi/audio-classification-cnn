@@ -21,11 +21,12 @@ image = (modal.Image.debian_slim()
 
 model_volume = modal.Volume.from_name("esc-model")
 
+
 class AudioProcessor:
     def __init__(self):
         self.transform = nn.Sequential(
             T.MelSpectrogram(
-                sample_rate=22050,
+                sample_rate=44100,
                 n_fft=1024,
                 hop_length=512,
                 n_mels=128,
@@ -76,8 +77,8 @@ class AudioClassifier:
         if audio_data.ndim > 1:
             audio_data = np.mean(audio_data, axis=1)
         
-        if sample_rate != 22050:
-            audio_data = librosa.resample(y=audio_data, orig_sr=sample_rate, target_sr=22050)
+        if sample_rate != 44100:
+            audio_data = librosa.resample(y=audio_data, orig_sr=sample_rate, target_sr=44100)
             
         spectrogram = self.audio_processor.process_audio_chunk(audio_data)
         spectrogram = spectrogram.to(self.device)
@@ -110,6 +111,7 @@ class AudioClassifier:
             clean_spectrogram = np.nan_to_num(spectrogram_np)
             
             max_samples = 8000
+            waveform_sample_rate = 44100
             if len(audio_data) > max_samples:
                 step = len(audio_data) // max_samples   
                 waveform_data = audio_data[::step]
@@ -125,8 +127,8 @@ class AudioClassifier:
             },
             "waveform": {
                 "values": waveform_data.tolist(),
-                "sample_rate": 22050,
-                "duration": len(audio_data) / 22050
+                "sample_rate": waveform_sample_rate,
+                "duration": len(audio_data) / waveform_sample_rate
             }
         }
 
