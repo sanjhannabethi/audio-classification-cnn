@@ -3,7 +3,8 @@
 import React, { useState } from "react";
 import { Button } from "~/components/ui/button";
 import { Badge } from "~/components/ui/badge";
-import { Card, CardContent } from "~/components/ui/card";
+import { Card, CardContent, CardHeader } from "~/components/ui/card";
+import { Progress } from "~/components/ui/progress";
 
 interface Prediction {
   class: string;
@@ -30,6 +31,83 @@ interface ApiResponse {
   visualization: VisualizationData;
   input_spectrogram: LayerData;
   waveform: WaveformData;
+}
+
+const ESC50_EMOJI_MAP: Record<string, string> = {
+  dog: "🐕",
+  rain: "🌧️",
+  crying_baby: "👶",
+  door_wood_knock: "🚪",
+  helicopter: "🚁",
+  rooster: "🐓",
+  sea_waves: "🌊",
+  sneezing: "🤧",
+  mouse_click: "🖱️",
+  chainsaw: "🪚",
+  pig: "🐷",
+  crackling_fire: "🔥",
+  clapping: "👏",
+  keyboard_typing: "⌨️",
+  siren: "🚨",
+  cow: "🐄",
+  crickets: "🦗",
+  breathing: "💨",
+  door_wood_creaks: "🚪",
+  car_horn: "📯",
+  frog: "🐸",
+  chirping_birds: "🐦",
+  coughing: "😷",
+  can_opening: "🥫",
+  engine: "🚗",
+  cat: "🐱",
+  water_drops: "💧",
+  footsteps: "👣",
+  washing_machine: "🧺",
+  train: "🚂",
+  hen: "🐔",
+  wind: "💨",
+  laughing: "😂",
+  vacuum_cleaner: "🧹",
+  church_bells: "🔔",
+  insects: "🦟",
+  pouring_water: "🚰",
+  brushing_teeth: "🪥",
+  clock_alarm: "⏰",
+  airplane: "✈️",
+  sheep: "🐑",
+  toilet_flush: "🚽",
+  snoring: "😴",
+  clock_tick: "⏱️",
+  fireworks: "🎆",
+  crow: "🐦‍⬛",
+  thunderstorm: "⛈️",
+  drinking_sipping: "🥤",
+  glass_breaking: "🔨",
+  hand_saw: "🪚",
+};
+
+const getEmojiForClass = (className: string): string => {
+  return ESC50_EMOJI_MAP[className] || "🔊";
+}
+
+function splitLayers(visualization: VisualizationData) {
+  const main: [string, LayerData][] = [];
+  const internals: Record<string, [string, LayerData][]> = {};
+
+  for (const [name, data] of Object.entries(visualization)) {
+    // check if it is a top-level or internal layer
+    if (!name.includes(".")) {
+      main.push([name, data]);
+    } else {
+      const [parent] = name.split(".");
+      if (parent === undefined) continue;
+
+      if (!internals[parent]) internals[parent] = [];
+      internals[parent].push([name, data]);
+    }
+  }
+
+  return { main, internals };
 }
 
 export default function HomePage() {
@@ -61,7 +139,8 @@ export default function HomePage() {
           ),
         );
 
-        const response = await fetch("https://sanjhannabethi--audio-cnn-inference-audioclassifier-inference.modal.run/",
+        const response = await fetch(
+          "https://sanjhannabethi--audio-cnn-inference-audioclassifier-inference.modal.run/",
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -90,13 +169,20 @@ export default function HomePage() {
     };
   };
 
+  const { main, internals } = vizData?.visualization
+    ? splitLayers(vizData?.visualization)
+    : { main: [], internals: {} };
+
   return (
     <main className="min-h-screen bg-stone-50 p-8">
       <div className="mx-audio-max-w-[60%]">
         <div className="mb-12 text-center">
-          <h1 className="mb-4 text-4xl font-light tracking-tight text-stone-900">CNN Audio Visualizer
+          <h1 className="mb-4 text-4xl font-light tracking-tight text-stone-900">
+            CNN Audio Visualizer
           </h1>
-          <p className="mb-8 text-md text-stone-600">Upload a WAV file to see the model's predictions and feature maps</p>
+          <p className="text-md mb-8 text-stone-600">
+            Upload a WAV file to see the model's predictions and feature maps
+          </p>
 
           <div className="flex flex-col items-center">
             <div className="relative inline-block">
@@ -121,7 +207,7 @@ export default function HomePage() {
             {fileName && (
               <Badge
                 variant="secondary"
-                className="mt-4 bg-stone-200 text-stone-700 "
+                className="mt-4 bg-stone-200 text-stone-700"
               >
                 {fileName}
               </Badge>
@@ -136,7 +222,31 @@ export default function HomePage() {
             </CardContent>
           </Card>
         )}
-    </div>
+
+        {vizData && (
+          <div className="space-y-8">
+            <Card>
+              <CardHeader>Top Predictions</CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {vizData.predictions.slice(0, 3).map((pred, i) => (
+                    <div key={pred.class} className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <div className="text-md font-medium text-stone-700">
+                          {getEmojiForClass(pred.class)}{" "}
+                          <span>{pred.class.replaceAll("_", " ")}</span>
+                        </div>
+                        <Badge variant={i === 0 ? "default" : "secondary"}>{(pred.confidence * 100).toFixed(1)}%</Badge>
+                      </div>
+                      <Progress value={pred.confidence * 100} className="h-2" />
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+      </div>
     </main>
   );
 }
