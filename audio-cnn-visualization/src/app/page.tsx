@@ -297,6 +297,24 @@ export default function HomePage() {
                           title={`${mainData.shape.join(" x ")}`}
                         />
                       </div>
+
+                      {internals[mainName] && (
+                        <div className="h-80 overflow-y-auto rounded border border-stone-200 bg-stone-50 p-2">
+                          <div className="space-y-2">
+                            {internals[mainName]
+                              .sort(([a], [b]) => a.localeCompare(b),
+                              )
+                              .map(([layerName, layerData]) => (
+                                <FeatureMap
+                                  key={layerName}
+                                  data={layerData.values}
+                                  title={layerName.replace(`${mainName}.`, "")}
+                                  internal={true}
+                                />
+                              ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
