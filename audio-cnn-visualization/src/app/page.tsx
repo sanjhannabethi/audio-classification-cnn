@@ -5,6 +5,8 @@ import { Button } from "~/components/ui/button";
 import { Badge } from "~/components/ui/badge";
 import { Card, CardContent, CardHeader } from "~/components/ui/card";
 import { Progress } from "~/components/ui/progress";
+import ColorScale from "~/components/ColorScale";
+import FeatureMap from "~/components/FeatureMap";
 
 interface Prediction {
   class: string;
@@ -244,6 +246,23 @@ export default function HomePage() {
                 </div>
               </CardContent>
             </Card>
+
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+              <Card>
+                <CardHeader className="text-stone-900">
+                  Input Spectrogram
+                </CardHeader>
+                <CardContent>
+                  {/* Feature map */}
+                  <FeatureMap data={vizData.input_spectrogram.values} title={`${vizData.input_spectrogram.shape.join(" x ")}`} />
+
+                  {/* Color scale */}
+                  <div className="mt-5 flex justify-end">
+                    <ColorScale width={200} height={16} min={-1} max={1} />
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </div>
         )}
       </div>
