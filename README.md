@@ -38,12 +38,6 @@ The project includes a **Modal cloud-deployed inference FastAPI inference servic
 
 ---
 
-## 📌 Demo
-
-_Add screenshots / GIFs of waveform, spectrogram, and feature map visualizations here._
-
----
-
 ## 📂 Project Structure
 
 ```
