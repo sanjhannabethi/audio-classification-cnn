@@ -50,8 +50,7 @@ The project includes a **Modal cloud-deployed inference FastAPI inference servic
 │
 ├── model.py                   # ResNet-based CNN architecture
 ├── train.py                   # Training pipeline (ESC-50 dataset, spectrogram conversion)
-├── inference.py               # FastAPI inference service (deployed on Modal)
-├── main.py                    # Entry point
+├── main.py                    # FastAPI inference service (deployed on Modal)
 ├── requirements.txt           # Python dependencies
 ├── chirpingbirds.wav          # Sample audio clip
 └── README.md
